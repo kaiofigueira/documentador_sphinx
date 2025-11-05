@@ -1,3 +1,5 @@
+# Template de Docstrings
+
 class Classe:
     """
     Explica de forma breve o propósito da classe.
@@ -43,7 +45,7 @@ class Classe:
         # Código da função
         retorno_da_funcao = float(parametro)
         return retorno_da_funcao
-        
+
     def funcao4(self, parametro: int) -> float:
         """
         Explica o que a função faz, o que ela retorna e os tratamentos de erros da mesma.
@@ -60,3 +62,4 @@ class Classe:
         # Código da função
         retorno_da_funcao = parametro
         return retorno_da_funcao
+        
