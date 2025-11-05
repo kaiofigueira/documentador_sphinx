@@ -246,66 +246,73 @@ class DocumentadorSphinx:
                 print(line, end='')
         print("Alteração feita com sucesso.")
 
-    def adicionar_documento(self, descricao):
+    def adicionar_documento(self, descricao: str) -> None:
         """
-        Adiciona um novo documento à documentação. A função irá solicitar um documento com extensão .md e uma descrição referente a esse documento.
-
-        Args:
-            descricao (str): O título do novo documento.
-
-        Returns:
-            None
+        Adiciona um arquivo .md aos docs e referencia no toctree do index.rst.
         """
         root = tk.Tk()
-        root.withdraw()  # Esconde a janela principal
+        root.withdraw()
 
-        # Abre a janela de seleção de arquivo
-        arquivo_md = filedialog.askopenfilename(filetypes=[("Markdown files", "*.md")])
+        caminho_md = filedialog.askopenfilename(filetypes=[("Markdown files", "*.md")])
+        if not caminho_md:
+            print("Operação cancelada.")
+            return
 
-        if arquivo_md:
-            # Obter apenas o nome do arquivo sem o caminho
-            nome_arquivo = os.path.basename(arquivo_md)
-            nome_arquivo_sem_extensao, _ = os.path.splitext(nome_arquivo)
+        docs_dir = Path(self.docs_dir)
+        docs_dir.mkdir(parents=True, exist_ok=True)
 
-            # Copiar o arquivo .md para a pasta do projeto
-            shutil.copy(arquivo_md, os.path.join(self.docs_dir, nome_arquivo))
+        src_md = Path(caminho_md)
+        nome_arquivo = src_md.name
+        nome_sem_ext = src_md.stem
+        dst_md = docs_dir / nome_arquivo
 
-            # Adicionar o nome do arquivo ao arquivo index.rst
-            index_rst_file = os.path.join(self.docs_dir, 'index.rst')
-            with open(index_rst_file, 'r') as file:
-                lines = file.readlines()
+        # Copia preservando metadata
+        shutil.copy2(src_md, dst_md)
 
-            # Procurar pela linha onde deve ser adicionado o novo documento
-            for i, line in enumerate(lines):
-                if line.strip() == '.. toctree::':
-                    # Encontrou o ponto onde deve ser adicionado o novo documento
-                    # Insere o novo documento e seu título
-                    lines.insert(i, f":doc:`{nome_arquivo_sem_extensao}`\n")
-                    lines.insert(i + 1, f"  {descricao}\n")
-                    lines.insert(i + 2, f"\n")
+        # Garante que o .md tem um título H1 para não virar <no title>
+        try:
+            texto = dst_md.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            # se o arquivo original não for UTF-8, lê em cp1252 e regrava em UTF-8
+            texto = dst_md.read_text(encoding="cp1252", errors="replace")
+        if not texto.lstrip().startswith("# "):
+            # coloca H1 com a descrição no topo
+            texto = f"# {descricao}\n\n{texto}"
+            dst_md.write_text(texto, encoding="utf-8", newline="\n")
 
-                    # Escreve as alterações de volta no arquivo
-                    with open(index_rst_file, 'w') as file:
-                        file.writelines(lines)
-                    
-                    # # Sai do loop depois de inserir o documento
-                    break
+        # Atualiza o index.rst (sempre em UTF-8)
+        index_path = docs_dir / "index.rst"
+        if not index_path.exists():
+            raise FileNotFoundError(f"index.rst não encontrado em {index_path}")
 
-            # Encontrar a linha onde deve ser adicionado o novo documento em modules
-            for i, line in enumerate(lines):
-                if line.strip() == 'modules':
-                    # Encontrou a linha 'modules'
-                    # Insere o nome do arquivo abaixo de 'modules'
-                    lines.insert(i + 1, f"   {nome_arquivo_sem_extensao}\n")
+        linhas = index_path.read_text(encoding="utf-8").splitlines(keepends=True)
 
-                    # Escreve as alterações de volta no arquivo
-                    with open(index_rst_file, 'w') as file:
-                        file.writelines(lines)
-                    
-                    # Sai do loop depois de inserir o documento em modules
-                    break
-            print("Adição feita com sucesso.")
+        # Encontra o bloco .. toctree:: e insere a referência (sem extensão)
+        entrada = f"   {nome_sem_ext}\n"
 
+        # não duplica
+        if any(l.strip() == nome_sem_ext for l in linhas):
+            print("Documento já referenciado no toctree.")
+            return
+
+        i = 0
+        while i < len(linhas) and linhas[i].strip() != ".. toctree::":
+            i += 1
+        if i == len(linhas):
+            raise RuntimeError("Bloco '.. toctree::' não encontrado no index.rst.")
+
+        # pula opções do toctree (linhas começando com 3 espaços e dois-pontos)
+        j = i + 1
+        while j < len(linhas) and (linhas[j].startswith("   :") or linhas[j].strip() == ""):
+            j += 1
+
+        # insere a entrada logo após o cabeçalho/opções (antes de outras entradas)
+        linhas.insert(j, entrada)
+
+        # salva em UTF-8 sempre
+        index_path.write_text("".join(linhas), encoding="utf-8", newline="\n")
+
+        print("Adição feita com sucesso.")
     def deletar_documento(self, nome_arquivo):
         """
         Deleta um documento da documentação.
