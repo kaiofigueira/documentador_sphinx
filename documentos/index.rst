@@ -11,7 +11,7 @@ Não se esqueça de ler o README do projeto — ele contém informações crucia
 
 Também veja:
 
-- :doc:`template_de_documentacao` — Um modelo de como documentar seu projeto usando docstrings.
+- :doc:`template_de_docstrings` — Um modelo de como documentar seu projeto usando docstrings.
 
 .. toctree::
    :maxdepth: 2

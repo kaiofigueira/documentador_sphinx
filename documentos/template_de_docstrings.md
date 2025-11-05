@@ -1,8 +1,10 @@
 # Template de Docstrings
 
+Abaixo está um exemplo de como escrever docstrings no formato Google-style, para que o Sphinx e o Napoleon gerem a documentação corretamente.
+
+```python
 class Classe:
-    """
-    Explica de forma breve o propósito da classe.
+    """Explica de forma breve o propósito da classe.
 
     Attributes:
         atributo1 (str): Descreve o que é o atributo1.
@@ -10,18 +12,15 @@ class Classe:
     """
 
     def funcao1(self) -> None:
-        """
-        Descreve o que essa função faz.
+        """Descreve o que essa função faz.
 
         Returns:
             None
         """
-        # Código da função
         pass
 
     def funcao2(self, parametro: str) -> None:
-        """
-        Explica o propósito da função.
+        """Explica o propósito da função.
 
         Args:
             parametro (str): Explica o que é esse parâmetro.
@@ -29,12 +28,10 @@ class Classe:
         Returns:
             None
         """
-        # Código da função
         pass
 
     def funcao3(self, parametro: int) -> float:
-        """
-        Explica o que a função faz e o que ela retorna.
+        """Explica o que a função faz e o que ela retorna.
 
         Args:
             parametro (int): Descreve o parâmetro usado.
@@ -42,13 +39,10 @@ class Classe:
         Returns:
             float: Resultado do processamento.
         """
-        # Código da função
-        retorno_da_funcao = float(parametro)
-        return retorno_da_funcao
+        return float(parametro)
 
     def funcao4(self, parametro: int) -> float:
-        """
-        Explica o que a função faz, o que ela retorna e os tratamentos de erros da mesma.
+        """Explica o que a função faz, o que ela retorna e os tratamentos de erros da mesma.
 
         Args:
             parametro (int): Descreve o parâmetro usado.
@@ -57,9 +51,6 @@ class Classe:
             list: Resultado do processamento.
 
         Raises:
-            ValueError: Se parametro não for uma lista
+            ValueError: Se parametro não for uma lista.
         """
-        # Código da função
-        retorno_da_funcao = parametro
-        return retorno_da_funcao
-        
+        return parametro
