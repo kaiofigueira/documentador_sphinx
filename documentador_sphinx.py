@@ -323,14 +323,18 @@ class DocumentadorSphinx:
         Returns:
             None
         """
+        import os
+
         # Passo 1: Deletar o arquivo da pasta 'documentos'
-        arquivo_md = os.path.join(self.docs_dir, nome_arquivo + '.md')  # Nome completo do arquivo
+        arquivo_md = os.path.join(self.docs_dir, nome_arquivo + '.md')
         if os.path.exists(arquivo_md):
             os.remove(arquivo_md)
 
         # Passo 2: Remover o nome do arquivo do arquivo 'index.rst'
         index_rst_file = os.path.join(self.docs_dir, 'index.rst')
-        with open(index_rst_file, 'r') as file:
+
+        # Usa encoding UTF-8 pra evitar UnicodeDecodeError no Windows
+        with open(index_rst_file, 'r', encoding='utf-8') as file:
             lines = file.readlines()
 
         # Iterar sobre as linhas e remover as correspondências
@@ -338,16 +342,16 @@ class DocumentadorSphinx:
         for i, line in enumerate(lines):
             if line.strip().startswith(f":doc:`{nome_arquivo}`"):
                 # Remove a linha com o nome do arquivo e a linha subsequente
-                lines_to_remove.extend([i, i+1])
+                lines_to_remove.extend([i, i + 1])
             elif line.strip() == f"{nome_arquivo}":
                 # Remove a linha com o nome do arquivo quando encontrada em 'modules'
                 lines_to_remove.append(i)
 
-        # Remover as linhas marcadas para exclusão
+        # Remove as linhas marcadas para exclusão
         lines = [line for i, line in enumerate(lines) if i not in lines_to_remove]
 
         # Passo 3: Salvar as alterações no arquivo 'index.rst'
-        with open(index_rst_file, 'w') as file:
+        with open(index_rst_file, 'w', encoding='utf-8', newline='\n') as file:
             file.writelines(lines)
-        
+
         print("Deleção feita com sucesso")
