@@ -3,7 +3,12 @@ import os
 import shutil
 import subprocess
 import tkinter as tk
+import sys
 from tkinter import filedialog
+from pathlib import Path
+
+from safe_file_manager import SafeFileManager
+
 # from weasyprint import HTML
 # import pdfkit
 
@@ -132,23 +137,32 @@ class DocumentadorSphinx:
                     return line.split('=')[1].strip().strip("'").strip('"')
 
     def gerar_documentacao(self):
-        """
-        Gera a documentação usando o Sphinx.
+        """Gera a documentação usando o Sphinx."""
+        source_dir = SafeFileManager.ensure_abs(self.source_dir)
+        docs_dir = SafeFileManager.ensure_abs(self.docs_dir)
+        api_docs_dir = SafeFileManager.ensure_abs(self.api_docs_dir)
+        output_dir = SafeFileManager.ensure_abs(Path(self.docs_dir) / self.output_dir)
 
-        Args:
-            None
+        # limpa pastas antigas
+        delete_ok = True
+        try:
+            if api_docs_dir.exists():
+                SafeFileManager.rmtree_safe(api_docs_dir)
+            if output_dir.exists():
+                SafeFileManager.rmtree_safe(output_dir)
+        except PermissionError:
+            delete_ok = False
 
-        Returns:
-            None
-        """
+        SafeFileManager.mkdir(api_docs_dir)
+        SafeFileManager.mkdir(docs_dir)
 
-        # Remover os diretórios existentes
-        if os.path.exists(self.api_docs_dir):
-            shutil.rmtree(self.api_docs_dir)
-        if os.path.exists(os.path.join(self.docs_dir, self.output_dir)):
-            shutil.rmtree(os.path.join(self.docs_dir, self.output_dir))
-
-        cmd = ['sphinx-apidoc', '-o', self.api_docs_dir, self.source_dir]
+        # usa python -m sphinx.ext.apidoc (funciona em qualquer SO)
+        cmd = [
+            sys.executable, "-m", "sphinx.ext.apidoc",
+            "-f", "-e", "-M",
+            "-o", str(api_docs_dir),
+            str(source_dir),
+        ]
         subprocess.run(cmd, check=True)
 
         print("Documentação criada com sucesso")
