@@ -19,7 +19,7 @@ Também veja:
    :hidden:
 
    README
-   template_de_documentacao
+   template_de_docstrings
    modules
 
 Índices e referências
