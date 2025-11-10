@@ -18,6 +18,7 @@ Também veja:
    :caption: Tópicos
    :hidden:
 
+   Teste_md
    README
    template_de_docstrings
    modules

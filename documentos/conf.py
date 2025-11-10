@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(SRC))
 
 # --- Info do projeto ---
-project = "Nome do projeto"
+project = 'Teste'
 author = "Kaio Figueira"
 copyright = "2025, Kaio Figueira"
 release = "0.0.0.1"
